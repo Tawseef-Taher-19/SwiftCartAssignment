@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SwiftCart</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="site-header">
+    <nav class="nav container">
+      <a class="brand" href="#home" aria-label="SwiftCart Home">SwiftCart</a>
+
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <button class="cart-btn" id="openCart" aria-label="Open cart">
+        Cart <span id="cartCount">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="home">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-content">
+        <h1>Best Collection For You</h1>
+        <p>Shop your favorite items — fast and simple.</p>
+        <a class="btn" href="#products">Shop Now</a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section container" id="about">
+      <h2>Why Choose Us</h2>
+      <div class="features">
+        <div class="feature-card">Fast Delivery</div>
+        <div class="feature-card">24/7 Support</div>
+        <div class="feature-card">Secure Payment</div>
+        <div class="feature-card">Top Quality</div>
+      </div>
+    </section>
+
+    <!-- Trending -->
+    <section class="section container">
+      <h2>Trending / Top Rated</h2>
+      <div class="grid" id="trendingGrid"></div>
+    </section>
+
+    <!-- Products -->
+    <section class="section container" id="products">
+      <h2>Products</h2>
+      <div id="categories" class="categories"></div>
+      <div class="grid" id="productGrid"></div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="section container" id="contact">
+      <h2>Newsletter</h2>
+      <form id="newsletterForm">
+        <input type="email" id="email" placeholder="Enter your email" required />
+        <button type="submit">Subscribe</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <small>© <span id="year"></span> SwiftCart</small>
+    </div>
+  </footer>
+
+  <!-- Details Modal (placeholder) -->
+  <div class="modal" id="detailsModal" aria-hidden="true"></div>
+
+  <!-- Cart Modal (placeholder) -->
+  <div class="modal" id="cartModal" aria-hidden="true"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
