@@ -184,10 +184,14 @@ async function loadProductsByCategory(category) {
   return data;
 }
 
+
 async function setCategory(category) {
   state.selectedCategory = category;
   renderCategories();
-  setLoading(true);
+
+  const isCached = state.cache.has(category);
+  if (!isCached) setLoading(true);
+
   try {
     const products = await loadProductsByCategory(category);
     state.filteredProducts = products;
@@ -195,9 +199,10 @@ async function setCategory(category) {
   } catch {
     els.grid.innerHTML = `<p class="muted">Failed to load products.</p>`;
   } finally {
-    setLoading(false);
+    if (!isCached) setLoading(false);
   }
 }
+
 
 function applySearch() {
   const q = (els.searchInput.value || "").trim().toLowerCase();
