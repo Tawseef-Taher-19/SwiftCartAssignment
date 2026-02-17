@@ -1,125 +1,85 @@
 const API = "https://fakestoreapi.com";
 
-// 1. Element Selectors - Centralized for cleaner code
 const els = {
-  categories: document.getElementById("categories"),
-  productGrid: document.getElementById("productGrid"),
+  year: document.getElementById("year"),
+  hamburger: document.getElementById("hamburger"),
+  navLinks: document.getElementById("navLinks"),
+
+  catWrap: document.getElementById("categories"),
+  grid: document.getElementById("productGrid"),
   trendingGrid: document.getElementById("trendingGrid"),
+  loading: document.getElementById("loading"),
+  searchInput: document.getElementById("searchInput"),
+
   detailsModal: document.getElementById("detailsModal"),
   detailsBody: document.getElementById("detailsBody"),
+
   cartModal: document.getElementById("cartModal"),
+  openCart: document.getElementById("openCart"),
   cartBody: document.getElementById("cartBody"),
   cartTotal: document.getElementById("cartTotal"),
   cartCount: document.getElementById("cartCount"),
-  year: document.getElementById("year")
+  checkoutBtn: document.getElementById("checkoutBtn"),
+
+  toast: document.getElementById("toast"),
+  newsletterForm: document.getElementById("newsletterForm"),
 };
 
-// 2. State Management
 const state = {
   categories: [],
   selectedCategory: "all",
-  cache: new Map(), // Stores products by category
+  cache: new Map(),       // key: category -> products[]
   allProducts: [],
-  currentProducts: [],
-  cart: [],
+  filteredProducts: [],
+  cart: loadCart(),       // [{id, qty}]
 };
 
-// 3. Helper Functions
-const truncate = (text, n = 46) => text.length > n ? text.slice(0, n) + "..." : text;
-const money = (n) => `$${Number(n).toFixed(2)}`;
-const starString = (rate) => "★".repeat(Math.round(rate)) + "☆".repeat(5 - Math.round(rate));
-
-// 4. Modal Logic
-const openModal = (modalEl) => {
-  modalEl.classList.add("open");
-  modalEl.setAttribute("aria-hidden", "false");
-};
-
-const closeModal = (modalEl) => {
-  modalEl.classList.remove("open");
-  modalEl.setAttribute("aria-hidden", "true");
-};
-
-// 5. Cart Logic
-function updateCartUI() {
-  const total = state.cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const count = state.cart.reduce((sum, item) => sum + item.qty, 0);
-
-  if (els.cartCount) els.cartCount.textContent = count;
-  if (els.cartTotal) els.cartTotal.textContent = money(total);
-
-  if (state.cart.length === 0) {
-    els.cartBody.innerHTML = `<p style="text-align:center; color:var(--muted); padding:20px;">Your cart is empty.</p>`;
-    return;
+function loadCart() {
+  try {
+    return JSON.parse(localStorage.getItem("swiftcart_cart") || "[]");
+  } catch {
+    return [];
   }
-
-  els.cartBody.innerHTML = state.cart.map(item => `
-    <div class="cart-item">
-      <img src="${item.image}" alt="${item.title}">
-      <div>
-        <h4>${truncate(item.title, 30)}</h4>
-        <div class="muted">${money(item.price)}</div>
-      </div>
-      <div class="qty">
-        <button class="icon-btn" data-qty-minus="${item.id}">-</button>
-        <span>${item.qty}</span>
-        <button class="icon-btn" data-qty-plus="${item.id}">+</button>
-      </div>
-    </div>
-  `).join("");
+}
+function saveCart() {
+  localStorage.setItem("swiftcart_cart", JSON.stringify(state.cart));
 }
 
-function addToCart(id) {
-  const product = state.allProducts.find(p => p.id === Number(id));
-  if (!product) return;
-
-  const existing = state.cart.find(item => item.id === product.id);
-  if (existing) {
-    existing.qty++;
-  } else {
-    state.cart.push({ ...product, qty: 1 });
-  }
-  updateCartUI();
+function setLoading(isLoading) {
+  els.loading.hidden = !isLoading;
 }
 
-function changeQty(id, delta) {
-  const item = state.cart.find(i => i.id === Number(id));
-  if (!item) return;
-  item.qty += delta;
-  if (item.qty <= 0) {
-    state.cart = state.cart.filter(i => i.id !== Number(id));
-  }
-  updateCartUI();
+function toast(msg) {
+  els.toast.textContent = msg;
+  els.toast.classList.add("show");
+  setTimeout(() => els.toast.classList.remove("show"), 1400);
 }
 
-// 6. Rendering Functions
-function cardHTML(p) {
-  const rate = p?.rating?.rate ?? 0;
-  return `
-    <article class="card">
-      <div class="card-img"><img src="${p.image}" alt="${p.title}"></div>
-      <div class="card-body">
-        <h3 class="card-title" title="${p.title}">${truncate(p.title)}</h3>
-        <div class="meta">
-          <span class="price">${money(p.price)}</span>
-          <span class="badge">${p.category}</span>
-        </div>
-        <div class="rating">
-          <span class="stars">${starString(rate)}</span>
-          <small>(${rate})</small>
-        </div>
-        <div class="actions">
-          <button class="btn" data-details="${p.id}">Details</button>
-          <button class="btn" data-add="${p.id}">+ Cart</button>
-        </div>
-      </div>
-    </article>`;
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Request failed");
+  return res.json();
 }
 
+function money(n) {
+  return `$${Number(n).toFixed(2)}`;
+}
+
+function truncate(text, n = 46) {
+  if (!text) return "";
+  return text.length > n ? text.slice(0, n) + "..." : text;
+}
+
+function starString(rate) {
+  const r = Math.max(0, Math.min(5, Number(rate || 0)));
+  const full = Math.round(r);
+  return "★".repeat(full) + "☆".repeat(5 - full);
+}
+
+/* ----------------- RENDER ----------------- */
 function renderCategories() {
-  if (!els.categories) return;
-  const all = ["all", ...state.categories];
-  els.categories.innerHTML = all
+  const list = ["all", ...state.categories];
+  els.catWrap.innerHTML = list
     .map((c) => {
       const active = c === state.selectedCategory ? "active" : "";
       return `<button class="cat-btn ${active}" data-cat="${c}">${c}</button>`;
@@ -127,90 +87,302 @@ function renderCategories() {
     .join("");
 }
 
-// 7. Data Fetching
-async function fetchJSON(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Request failed");
-  return res.json();
+function cardHTML(p, compact = false) {
+  const rate = p?.rating?.rate ?? 0;
+  const count = p?.rating?.count ?? 0;
+
+  return `
+  <article class="card">
+    <div class="card-img">
+      <img src="${p.image}" alt="${p.title}">
+    </div>
+
+    <div class="card-body">
+      <h3 class="card-title" title="${p.title}">${truncate(p.title, compact ? 40 : 48)}</h3>
+
+      <div class="meta">
+        <span class="price">${money(p.price)}</span>
+        <span class="badge">${p.category}</span>
+      </div>
+
+      <div class="rating">
+        <span class="stars">${starString(rate)}</span>
+        <small>(${rate} • ${count})</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn" data-details="${p.id}">Details</button>
+        <button class="btn primary" data-add="${p.id}">Add to Cart</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function renderProducts(items) {
+  els.grid.innerHTML = items.map((p) => cardHTML(p)).join("");
+}
+
+function renderTrending() {
+  const top3 = [...state.allProducts]
+    .sort((a, b) => (b.rating?.rate ?? 0) - (a.rating?.rate ?? 0))
+    .slice(0, 3);
+
+  els.trendingGrid.innerHTML = top3.map((p) => cardHTML(p, true)).join("");
+}
+
+function updateCartUI() {
+  const totalItems = state.cart.reduce((sum, it) => sum + it.qty, 0);
+  els.cartCount.textContent = totalItems;
+
+  const itemsHTML = state.cart
+    .map((it) => {
+      const p = state.allProducts.find((x) => x.id === it.id);
+      if (!p) return "";
+      return `
+      <div class="cart-item">
+        <img src="${p.image}" alt="${p.title}">
+        <div>
+          <h4 title="${p.title}">${truncate(p.title, 44)}</h4>
+          <div class="muted">${money(p.price)} • <span class="badge">${p.category}</span></div>
+        </div>
+        <div class="qty">
+          <button class="icon-btn" data-dec="${p.id}" aria-label="Decrease">−</button>
+          <strong>${it.qty}</strong>
+          <button class="icon-btn" data-inc="${p.id}" aria-label="Increase">+</button>
+          <button class="icon-btn" data-remove="${p.id}" aria-label="Remove">🗑️</button>
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  els.cartBody.innerHTML = itemsHTML || `<p class="muted">Your cart is empty.</p>`;
+
+  const total = state.cart.reduce((sum, it) => {
+    const p = state.allProducts.find((x) => x.id === it.id);
+    return sum + (p ? p.price * it.qty : 0);
+  }, 0);
+
+  els.cartTotal.textContent = money(total);
+}
+
+/* ----------------- DATA LOAD ----------------- */
+async function loadCategories() {
+  state.categories = await fetchJSON(`${API}/products/categories`);
+  renderCategories();
+}
+
+async function loadProductsByCategory(category) {
+  if (state.cache.has(category)) return state.cache.get(category);
+
+  const url =
+    category === "all"
+      ? `${API}/products`
+      : `${API}/products/category/${encodeURIComponent(category)}`;
+
+  const data = await fetchJSON(url);
+  state.cache.set(category, data);
+  return data;
 }
 
 async function setCategory(category) {
   state.selectedCategory = category;
   renderCategories();
+  setLoading(true);
   try {
-    let list;
-    if (state.cache.has(category)) {
-      list = state.cache.get(category);
-    } else {
-      const url = category === "all" ? `${API}/products` : `${API}/products/category/${encodeURIComponent(category)}`;
-      list = await fetchJSON(url);
-      state.cache.set(category, list);
-    }
-    state.currentProducts = list;
-    els.productGrid.innerHTML = list.map(cardHTML).join("");
+    const products = await loadProductsByCategory(category);
+    state.filteredProducts = products;
+    applySearch();
   } catch {
-    els.productGrid.innerHTML = "<p>Failed to load products.</p>";
+    els.grid.innerHTML = `<p class="muted">Failed to load products.</p>`;
+  } finally {
+    setLoading(false);
   }
+}
+
+function applySearch() {
+  const q = (els.searchInput.value || "").trim().toLowerCase();
+  const list = q
+    ? state.filteredProducts.filter((p) => (p.title || "").toLowerCase().includes(q))
+    : state.filteredProducts;
+
+  renderProducts(list);
+}
+
+/* ----------------- MODALS ----------------- */
+function openModal(modalEl) {
+  modalEl.classList.add("open");
+  modalEl.setAttribute("aria-hidden", "false");
+}
+function closeModal(modalEl) {
+  modalEl.classList.remove("open");
+  modalEl.setAttribute("aria-hidden", "true");
 }
 
 async function openDetails(id) {
   openModal(els.detailsModal);
-  els.detailsBody.innerHTML = "<p>Loading details...</p>";
+  els.detailsBody.innerHTML =
+    `<div class="loading"><div class="spinner"></div><span>Loading details...</span></div>`;
+
   try {
     const p = await fetchJSON(`${API}/products/${id}`);
     const rate = p?.rating?.rate ?? 0;
+
     els.detailsBody.innerHTML = `
-      <div class="details-img"><img src="${p.image}" alt="${p.title}"></div>
+      <div class="details-img">
+        <img src="${p.image}" alt="${p.title}">
+      </div>
       <div class="details-info">
         <h2>${p.title}</h2>
-        <div class="details-row"><span class="badge">${p.category}</span><span>⭐ ${rate}</span></div>
-        <p>${p.description}</p>
-        <div class="details-row"><strong>${money(p.price)}</strong></div>
-        <div class="details-actions">
-          <button class="btn" data-add="${p.id}">Add to Cart</button>
+        <div class="details-row">
+          <span class="badge">${p.category}</span>
+          <span class="muted"><span class="stars">${starString(rate)}</span> (${rate})</span>
         </div>
-      </div>`;
+        <p>${p.description}</p>
+        <div class="details-row">
+          <strong>${money(p.price)}</strong>
+          <span class="muted">In stock (demo)</span>
+        </div>
+        <div class="details-actions">
+          <button class="btn" data-close="details">Buy Now</button>
+          <button class="btn primary" data-add="${p.id}">Add to Cart</button>
+        </div>
+      </div>
+    `;
   } catch {
-    els.detailsBody.innerHTML = "<p>Error loading details.</p>";
+    els.detailsBody.innerHTML = `<p class="muted">Failed to load details.</p>`;
   }
 }
 
-// 8. Global Event Listeners (Event Delegation)
-document.addEventListener("click", (e) => {
-  const target = e.target;
+/* ----------------- CART LOGIC ----------------- */
+function addToCart(id) {
+  id = Number(id);
+  const item = state.cart.find((x) => x.id === id);
+  if (item) item.qty += 1;
+  else state.cart.push({ id, qty: 1 });
 
-  if (target.closest("[data-cat]")) setCategory(target.closest("[data-cat]").dataset.cat);
-  if (target.closest("[data-details]")) openDetails(target.closest("[data-details]").dataset.details);
-  if (target.closest("[data-add]")) addToCart(target.closest("[data-add]").dataset.add);
-  
-  // Modal Toggles
-  if (target.closest("#cartBtn")) openModal(els.cartModal);
-  if (target.closest("[data-close='cart']")) closeModal(els.cartModal);
-  if (target.closest("[data-close='details']")) closeModal(els.detailsModal);
+  saveCart();
+  updateCartUI();
+  toast("Added to cart");
+}
 
-  // Qty adjust
-  if (target.closest("[data-qty-plus]")) changeQty(target.closest("[data-qty-plus]").dataset.qtyPlus, 1);
-  if (target.closest("[data-qty-minus]")) changeQty(target.closest("[data-qty-minus]").dataset.qtyMinus, -1);
+function incQty(id) {
+  const item = state.cart.find((x) => x.id === Number(id));
+  if (!item) return;
+  item.qty += 1;
+  saveCart();
+  updateCartUI();
+}
+
+function decQty(id) {
+  const item = state.cart.find((x) => x.id === Number(id));
+  if (!item) return;
+  item.qty -= 1;
+  if (item.qty <= 0) state.cart = state.cart.filter((x) => x.id !== Number(id));
+  saveCart();
+  updateCartUI();
+}
+
+function removeItem(id) {
+  state.cart = state.cart.filter((x) => x.id !== Number(id));
+  saveCart();
+  updateCartUI();
+}
+
+/* ----------------- EVENTS ----------------- */
+document.addEventListener("click", async (e) => {
+  // Category
+  const catBtn = e.target.closest(".cat-btn");
+  if (catBtn) {
+    await setCategory(catBtn.dataset.cat);
+    return;
+  }
+
+  // Details open
+  const detailsBtn = e.target.closest("[data-details]");
+  if (detailsBtn) {
+    await openDetails(detailsBtn.dataset.details);
+    return;
+  }
+
+  // Add to cart (from card or modal)
+  const addBtn = e.target.closest("[data-add]");
+  if (addBtn) {
+    addToCart(addBtn.dataset.add);
+    return;
+  }
+
+  // Close modals
+  const closeBtn = e.target.closest("[data-close]");
+  if (closeBtn?.dataset.close === "details") closeModal(els.detailsModal);
+  if (closeBtn?.dataset.close === "cart") closeModal(els.cartModal);
+
+  // Backdrop close
+  if (e.target.matches(".modal-backdrop")) {
+    const which = e.target.getAttribute("data-close");
+    if (which === "details") closeModal(els.detailsModal);
+    if (which === "cart") closeModal(els.cartModal);
+  }
+
+  // Cart controls
+  const inc = e.target.closest("[data-inc]");
+  if (inc) incQty(inc.dataset.inc);
+
+  const dec = e.target.closest("[data-dec]");
+  if (dec) decQty(dec.dataset.dec);
+
+  const rm = e.target.closest("[data-remove]");
+  if (rm) removeItem(rm.dataset.remove);
 });
 
-// 9. Init
-async function init() {
-  if (els.year) els.year.textContent = new Date().getFullYear();
-  try {
-    const products = await fetchJSON(`${API}/products`);
-    state.allProducts = products;
-    state.currentProducts = products;
-    state.cache.set("all", products);
-    
-    els.productGrid.innerHTML = products.map(cardHTML).join("");
-    if (els.trendingGrid) els.trendingGrid.innerHTML = products.slice(0, 3).map(cardHTML).join("");
-    
-    state.categories = await fetchJSON(`${API}/products/categories`);
-    renderCategories();
-    updateCartUI();
-  } catch (err) {
-    console.error(err);
-  }
-}
+els.openCart.addEventListener("click", () => {
+  openModal(els.cartModal);
+  updateCartUI();
+});
 
-init();
+els.searchInput.addEventListener("input", applySearch);
+
+els.hamburger.addEventListener("click", () => {
+  const open = els.navLinks.classList.toggle("open");
+  els.hamburger.setAttribute("aria-expanded", String(open));
+});
+
+els.newsletterForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  toast("Subscribed!");
+  e.target.reset();
+});
+
+els.checkoutBtn.addEventListener("click", () => {
+  toast("Checkout (demo)");
+});
+
+/* ----------------- INIT ----------------- */
+(async function init() {
+  els.year.textContent = String(new Date().getFullYear());
+
+  // Load all products first (for trending + cart price lookup)
+  setLoading(true);
+  try {
+    const all = await fetchJSON(`${API}/products`);
+    state.allProducts = all;
+    state.cache.set("all", all);
+
+    // default
+    state.filteredProducts = all;
+    renderTrending();
+    renderProducts(all);
+  } catch {
+    els.grid.innerHTML = `<p class="muted">Failed to load products.</p>`;
+  } finally {
+    setLoading(false);
+  }
+
+  // Categories
+  try {
+    await loadCategories();
+  } catch {
+    els.catWrap.innerHTML = `<p class="muted">Failed to load categories.</p>`;
+  }
+
+  updateCartUI();
+})();

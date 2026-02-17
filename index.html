@@ -4,89 +4,166 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SwiftCart</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css"/>
 </head>
 <body>
   <!-- Navbar -->
   <header class="site-header">
     <nav class="nav container">
-      <a class="brand" href="#home" aria-label="SwiftCart Home">SwiftCart</a>
+      <a class="brand" href="#home" aria-label="SwiftCart Home">
+        <span class="brand-mark">🛒</span>
+        <span class="brand-name">SwiftCart</span>
+      </a>
 
-      <ul class="nav-links">
-        <li><a href="#home">Home</a></li>
-        <li><a href="#products">Products</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#contact">Contact</a></li>
+      <button class="icon-btn hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        ☰
+      </button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#products" class="nav-link">Products</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
       </ul>
 
       <button class="cart-btn" id="openCart" aria-label="Open cart">
-        Cart <span id="cartCount">0</span>
+        🧺 <span class="cart-count" id="cartCount">0</span>
       </button>
     </nav>
   </header>
 
+  <!-- Hero -->
   <main id="home">
-    <!-- Hero -->
     <section class="hero">
+      <div class="hero-overlay"></div>
       <div class="container hero-content">
         <h1>Best Collection For You</h1>
-        <p>Shop your favorite items — fast and simple.</p>
-        <a class="btn" href="#products">Shop Now</a>
+        <p>Explore trending fashion, electronics & more — powered by FakeStore API.</p>
+        <a class="btn primary" href="#products">Shop Now</a>
       </div>
     </section>
 
     <!-- Features -->
     <section class="section container" id="about">
-      <h2>Why Choose Us</h2>
+      <div class="section-head">
+        <h2>Why Choose Us</h2>
+        <p>Simple, fast and secure shopping experience.</p>
+      </div>
+
       <div class="features">
-        <div class="feature-card">Fast Delivery</div>
-        <div class="feature-card">24/7 Support</div>
-        <div class="feature-card">Secure Payment</div>
-        <div class="feature-card">Top Quality</div>
+        <div class="feature-card">
+          <div class="feature-icon">🚚</div>
+          <h3>Fast Delivery</h3>
+          <p>Quick dispatch with reliable delivery partners.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🕒</div>
+          <h3>24/7 Support</h3>
+          <p>We’re here to help anytime you need us.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Secure Payment</h3>
+          <p>Safe checkout with trusted security standards.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⭐</div>
+          <h3>Top Quality</h3>
+          <p>Curated products with customer ratings.</p>
+        </div>
       </div>
     </section>
 
     <!-- Trending -->
     <section class="section container">
-      <h2>Trending / Top Rated</h2>
-      <div class="grid" id="trendingGrid"></div>
+      <div class="section-head">
+        <h2>Trending / Top Rated</h2>
+        <p>Top rated picks from our catalog.</p>
+      </div>
+
+      <div class="grid" id="trendingGrid" aria-live="polite"></div>
     </section>
 
     <!-- Products -->
     <section class="section container" id="products">
-      <h2>Products</h2>
-      <div id="categories" class="categories"></div>
-      <div class="grid" id="productGrid"></div>
+      <div class="section-head">
+        <h2>Products</h2>
+        <p>Browse by category and find your next favorite item.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="categories" id="categories" aria-label="Product categories"></div>
+
+        <div class="search-wrap">
+          <input id="searchInput" class="input" type="search" placeholder="Search title..." />
+        </div>
+      </div>
+
+      <div class="loading" id="loading" hidden>
+        <div class="spinner" aria-label="Loading"></div>
+        <span>Loading products...</span>
+      </div>
+
+      <div class="grid" id="productGrid" aria-live="polite"></div>
     </section>
 
     <!-- Newsletter -->
-    <section class="section container" id="contact">
-      <h2>Newsletter</h2>
-      <form id="newsletterForm">
-        <input type="email" id="email" placeholder="Enter your email" required />
-        <button type="submit">Subscribe</button>
-      </form>
+    <section class="section newsletter" id="contact">
+      <div class="container newsletter-inner">
+        <div>
+          <h2>Newsletter</h2>
+          <p>Get updates on new arrivals and deals.</p>
+        </div>
+        <form class="newsletter-form" id="newsletterForm">
+          <input class="input" type="email" id="email" placeholder="Enter your email" required />
+          <button class="btn primary" type="submit">Subscribe</button>
+        </form>
+      </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <div class="container">
-      <small>© <span id="year"></span> SwiftCart</small>
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">SwiftCart</div>
+        <p class="muted">A simple e-commerce UI using FakeStore API.</p>
+      </div>
+
+      <div class="footer-cols">
+        <div>
+          <h4>Quick Links</h4>
+          <a href="#home">Home</a>
+          <a href="#products">Products</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div>
+          <h4>Social</h4>
+          <a href="#" aria-label="Facebook">Facebook</a>
+          <a href="#" aria-label="Twitter">Twitter</a>
+          <a href="#" aria-label="Instagram">Instagram</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <small>© <span id="year"></span> SwiftCart. All rights reserved.</small>
     </div>
   </footer>
 
-  <!-- Details Modal (placeholder) -->
-  <div class="modal" id="detailsModal" aria-hidden="true" role="dialog" aria-label="Product details">
-  <div class="modal-backdrop" data-close="details"></div>
-  <div class="modal-panel">
-    <button class="icon-btn modal-close" data-close="details" aria-label="Close details">✕</button>
-    <div class="modal-body" id="detailsBody"></div>
+  <!-- Product Details Modal -->
+  <div class="modal" id="detailsModal" aria-hidden="true" role="dialog" aria-label="Product details modal">
+    <div class="modal-backdrop" id="modalBackdropDetails" data-close="details"></div>
+    <div class="modal-panel">
+      <button class="icon-btn modal-close" data-close="details" aria-label="Close details">✕</button>
+      <div class="modal-body" id="detailsBody"></div>
+    </div>
   </div>
-</div>
 
-  <!-- Cart Modal (placeholder) -->
-  <div class="modal" id="cartModal" aria-hidden="true" role="dialog" aria-label="Cart">
-    <div class="modal-backdrop" data-close="cart"></div>
+  <!-- Cart Modal -->
+  <div class="modal" id="cartModal" aria-hidden="true" role="dialog" aria-label="Cart modal">
+    <div class="modal-backdrop" id="modalBackdropCart" data-close="cart"></div>
     <div class="modal-panel cart-panel">
       <div class="cart-head">
         <h3>Your Cart</h3>
@@ -100,10 +177,13 @@
           <span>Total</span>
           <strong id="cartTotal">$0.00</strong>
         </div>
-        <button class="btn" id="checkoutBtn">Checkout</button>
+        <button class="btn primary" id="checkoutBtn">Checkout</button>
       </div>
     </div>
   </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="./app.js"></script>
 </body>
