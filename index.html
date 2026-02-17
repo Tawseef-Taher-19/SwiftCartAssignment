@@ -76,7 +76,13 @@
   </footer>
 
   <!-- Details Modal (placeholder) -->
-  <div class="modal" id="detailsModal" aria-hidden="true"></div>
+  <div class="modal" id="detailsModal" aria-hidden="true" role="dialog" aria-label="Product details">
+  <div class="modal-backdrop" data-close="details"></div>
+  <div class="modal-panel">
+    <button class="icon-btn modal-close" data-close="details" aria-label="Close details">✕</button>
+    <div class="modal-body" id="detailsBody"></div>
+  </div>
+</div>
 
   <!-- Cart Modal (placeholder) -->
   <div class="modal" id="cartModal" aria-hidden="true"></div>
