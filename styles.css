@@ -79,7 +79,7 @@ a{ color:inherit; text-decoration:none; }
   gap:10px;
   border:1px solid var(--border);
   background: linear-gradient(135deg, rgba(110,231,255,.16), rgba(167,139,250,.16));
-  color: var(--text);
+  color: white; 
   border-radius: 12px;
   padding: 10px 12px;
   cursor:pointer;
@@ -288,6 +288,13 @@ a{ color:inherit; text-decoration:none; }
   padding: 4px 8px;
   border-radius: 999px;
 }
+.badge{ /*category */
+  opacity: 1;
+  color: #111;
+  background: rgba(0,0,0,.08);
+  border-color: rgba(0,0,0,.18);
+}
+
 .rating{
   display:flex;
   align-items:center;
@@ -480,4 +487,73 @@ a{ color:inherit; text-decoration:none; }
 }
 @media (max-width: 440px){
   .grid{ grid-template-columns: 1fr; }
+}
+
+
+/* cart in light mode */
+.cart-btn{
+  background: #ffffff;          /* light background */
+  color: var(--text);           /* normal text color */
+  border: 1px solid var(--border);
+}
+
+.cart-count{
+  background: #f3f4f6;          /* light badge */
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* Cart modal panel: only cart modal becomes light */
+#cartModal .modal-panel{
+  background: #ffffff;          /* light panel */
+  color: var(--text);
+}
+
+/* Keep backdrop same (optional) */
+#cartModal .modal-backdrop{
+  background: rgba(0,0,0,.45);  /* slightly lighter than before */
+}
+
+/* Cart item cards */
+#cartModal .cart-item{
+  background: #f9fafb;          /* light gray */
+  border: 1px solid var(--border);
+}
+
+/* Product thumbnail inside cart */
+#cartModal .cart-item img{
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+
+/* Cart headings + muted text inside cart */
+#cartModal .cart-head h3,
+#cartModal .cart-total strong{
+  color: var(--text);
+}
+
+#cartModal .muted,
+#cartModal .cart-total{
+  color: var(--muted);
+}
+
+/* Cart buttons (qty +/- remove, close) */
+#cartModal .icon-btn{
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* Checkout button (optional nicer on light) */
+#checkoutBtn{
+  background: #111827;  /* dark button on light panel looks good */
+  color: #ffffff;
+  border: 1px solid #111827;
+}
+
+.modal-panel{ background: rgba(17,26,46,.98); }
+
+.toast{
+  color: #fff;                 /* ✅ white text */
+  background: rgba(0,0,0,.85); /* optional: darker background */
 }
