@@ -85,7 +85,25 @@
 </div>
 
   <!-- Cart Modal (placeholder) -->
-  <div class="modal" id="cartModal" aria-hidden="true"></div>
+  <div class="modal" id="cartModal" aria-hidden="true" role="dialog" aria-label="Cart">
+    <div class="modal-backdrop" data-close="cart"></div>
+    <div class="modal-panel cart-panel">
+      <div class="cart-head">
+        <h3>Your Cart</h3>
+        <button class="icon-btn modal-close" data-close="cart" aria-label="Close cart">✕</button>
+      </div>
+
+      <div class="cart-body" id="cartBody"></div>
+
+      <div class="cart-foot">
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">$0.00</strong>
+        </div>
+        <button class="btn" id="checkoutBtn">Checkout</button>
+      </div>
+    </div>
+  </div>
 
   <script src="./app.js"></script>
 </body>
