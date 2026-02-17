@@ -300,3 +300,21 @@ a {
 .actions .btn {
   flex: 1;
 }
+
+/* Category buttons */
+.cat-btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, .05);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+
+.cat-btn.active {
+  color: var(--text);
+  background: rgba(255, 255, 255, .10);
+  border-color: rgba(255, 255, 255, 0.3);
+}

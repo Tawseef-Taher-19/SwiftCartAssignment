@@ -8,11 +8,13 @@ document.getElementById("newsletterForm").addEventListener("submit", (e) => {
   e.target.reset();
 });
 
-async function fetchJSON(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Request failed");
-  return res.json();
-}
+const state = {
+  categories: [],
+  selectedCategory: "all",
+  cache: new Map(), // key: category -> products[]
+  allProducts: [],
+  currentProducts: [],
+};
 
 function truncate(text, n = 46) {
   return text.length > n ? text.slice(0, n) + "..." : text;
@@ -58,13 +60,73 @@ function renderProducts(list) {
   document.getElementById("productGrid").innerHTML = list.map(cardHTML).join("");
 }
 
+function renderTrending(list) {
+  document.getElementById("trendingGrid").innerHTML = list.slice(0, 3).map(cardHTML).join("");
+}
+
+function renderCategories() {
+  const wrap = document.getElementById("categories");
+  if (!wrap) return;
+  const all = ["all", ...state.categories];
+
+  wrap.innerHTML = all
+    .map((c) => {
+      const active = c === state.selectedCategory ? "active" : "";
+      return `<button class="cat-btn ${active}" data-cat="${c}">${c}</button>`;
+    })
+    .join("");
+}
+
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Request failed");
+  return res.json();
+}
+
+async function loadCategories() {
+  state.categories = await fetchJSON(`${API}/products/categories`);
+  renderCategories();
+}
+
+async function loadProducts(category = "all") {
+  if (state.cache.has(category)) return state.cache.get(category);
+
+  const url =
+    category === "all"
+      ? `${API}/products`
+      : `${API}/products/category/${encodeURIComponent(category)}`;
+
+  const products = await fetchJSON(url);
+  state.cache.set(category, products);
+  return products;
+}
+
+async function setCategory(category) {
+  state.selectedCategory = category;
+  renderCategories();
+
+  try {
+    const list = await loadProducts(category);
+    state.currentProducts = list;
+    renderProducts(list);
+  } catch {
+    document.getElementById("productGrid").innerHTML = "<p style='color:#9aa7c7'>Failed to load products.</p>";
+  }
+}
+
+document.addEventListener("click", (e) => {
+  const cat = e.target.closest("[data-cat]");
+  if (cat) setCategory(cat.dataset.cat);
+});
+
 async function init() {
   try {
-    const products = await fetchJSON(`${API}/products`);
-    renderProducts(products);
-
-    // Temporary trending: first 3 (will improve later)
-    document.getElementById("trendingGrid").innerHTML = products.slice(0, 3).map(cardHTML).join("");
+    const all = await loadProducts("all");
+    state.allProducts = all;
+    state.currentProducts = all;
+    renderProducts(all);
+    renderTrending(all);
+    await loadCategories();
   } catch (err) {
     document.getElementById("productGrid").innerHTML = "<p style='color:#9aa7c7'>Failed to load products.</p>";
   }
